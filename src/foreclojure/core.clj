@@ -60,18 +60,19 @@
 (def solution-60
   (fn my-reduce
     ([f val coll]
-     (loop [ret []
-            state val
-            c coll]
-       (if c
-         (recur (conj ret (f state (first c)))
-                (first c)
-                (next c))
-         ret)))
+     (letfn [(step [v c]
+               (lazy-seq
+                (println v (take 10 c))
+                (if c
+                  (cons v (step (f v (first c)) (next c)))
+                  (list v)))) ; this will be the 2nd arg to 'cons', so it must be a list to complete the sequence.
+             ]
+       (step val coll)))
     ([f coll]
-     (my-reduce f (first coll) (rest coll)))
-    ))
+     (my-reduce f (first coll) (rest coll))))
+  )
 
 ;; does this help? http://stackoverflow.com/questions/21712145/lazy-sequence-using-loop-recur
+;; this answer is amazing and deserves a blog post to fully digest.
 
 ;(Is (= (take 5 (solution-60 + (range))) [0 1 3 6 10]))
