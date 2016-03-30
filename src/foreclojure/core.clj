@@ -62,7 +62,6 @@
     ([f val coll]
      (letfn [(step [v c]
                (lazy-seq
-                (println v (take 10 c))
                 (if c
                   (cons v (step (f v (first c)) (next c)))
                   (list v)))) ; this will be the 2nd arg to 'cons', so it must be a list to complete the sequence.
