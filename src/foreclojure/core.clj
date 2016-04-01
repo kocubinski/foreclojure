@@ -75,3 +75,36 @@
 ;; this answer is amazing and deserves a blog post to fully digest.
 
 ;(Is (= (take 5 (solution-60 + (range))) [0 1 3 6 10]))
+
+;; solution 61
+(def solution-61
+  (fn [ks vs]
+    (into {} (map vector ks vs)))
+  )
+
+(def solution-62
+  (fn step [f x]
+    (lazy-seq
+     (cons x (step f (f x))))
+    )
+  )
+
+(def solution-63
+  (fn [f s]
+    (reduce (fn [m v]
+              (update-in m [(f v)] #(if % (conj % v) [v]))) {} s))
+  )
+
+(def solution-65
+  (fn [s]
+    (let [head (first s)
+          pair [::x ::y]
+          res (conj s [::x s])]
+      (cond
+        (= (count res) (inc (count s))) :map
+        ;(= (count (conj s head) s)) :set
+        (= (first res) pair) :list
+        (= (peek res) pair) :vector
+        :else :set
+        )))
+  )
