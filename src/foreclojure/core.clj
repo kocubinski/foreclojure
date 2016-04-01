@@ -99,7 +99,7 @@
   (fn [s]
     (let [head (first s)
           pair [::x ::y]
-          res (conj s [::x s])]
+          res (conj s pair)]
       (cond
         (= (count res) (inc (count s))) :map
         ;(= (count (conj s head) s)) :set
