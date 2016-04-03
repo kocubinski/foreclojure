@@ -97,14 +97,145 @@
 
 (def solution-65
   (fn [s]
-    (let [head (first s)
-          pair [::x ::y]
-          res (conj s pair)]
+    (let [len (count s)]
       (cond
-        (= (count res) (inc (count s))) :map
-        ;(= (count (conj s head) s)) :set
-        (= (first res) pair) :list
-        (= (peek res) pair) :vector
-        :else :set
+        (= (inc len) (count (conj s [::x ::x] [::x ::y]))) :map
+        (= (inc len) (count (conj s ::x ::x))) :set
+        (= (first (conj s ::x ::y)) ::y) :list
+        (= (last (conj s ::x ::y)) ::y) :vector
         )))
+  )
+
+(def solution-66
+  (fn [x y]
+    (loop [n (min x y)]
+      (if (and (= (mod x n) 0)
+               (= (mod y n) 0)) n
+          (recur (dec n)))))
+  )
+
+(def solution-67
+  (fn [len]
+    (loop [i 1
+           primes [2]
+           ns (iterate inc 3)]
+      (if (= i len)
+        primes
+        (let [n (first ns)]
+          (if (some zero? (map #(mod n %) primes))
+            (recur i primes (rest ns))
+            (recur (inc i) (conj primes n) (rest ns)))
+          ))))
+  )
+
+(def solution-69
+  (fn [f & ms]
+    (into {}
+          (map (fn [k]
+                 (let [vals (filter identity (map #(get % k) ms))]
+                   [k (if (= (count vals) 1) (first vals) (apply f vals))]))
+               (-> (map keys ms) flatten set))))
+  )
+
+(def solution-70
+  (fn [s]
+    (sort-by #(.toLowerCase %) (re-seq #"\w+" s)))
+  )
+
+;; this sucks
+(def solution-73
+  (fn [board]
+    (letfn [(get-points [sym m]
+              (filter identity
+                      (for [x (range (count m))
+                            y (range (count (m 0)))]
+                        (when (= ((m x) y) sym)
+                          [x y]))))
+            (line? [[x1 y1] [x2 y2]]
+              (or (= x1 x2)
+                  (= y1 y2)
+                  (= (Math/abs (- x1 x2)) (Math/abs (- y1 y2)))))
+            (slope [[x1 y1] [x2 y2]]
+              (let [dx (- x2 x1)
+                    dy (- y2 y1)]
+                [x2 y2 (cond
+                         (and (= dx 0) (= dy 0)) ::NaN
+                         (= dx 0) ::Inf
+                         :else (/ dy dx))]))
+            (winner? [sym]
+              (let [points (get-points sym board)
+                    clumps (map (fn [point]
+                                  (->> points
+                                       (filter #(line? point %))
+                                       (map #(slope point %))))
+                                points)
+                    lines (map (fn [clump]
+                                 (map (fn [p]
+                                        (map #(line? % p) clump))
+                                      clump))
+                               clumps)]
+                (some #(and (> (count %) 2)
+                            (apply = (->> % (map last) (filter (partial not= ::NaN)))))
+                      clumps)))]
+      (cond
+        (winner? :x) :x
+        (winner? :o) :o)))
+  )
+
+;; god dammit
+(defn jbear-73 [b]
+  (first (some #{[:x :x :x] [:o :o :o]}
+               (concat b (apply map list b)
+                       (map
+                        #(map (fn [a i] (a i)) b %)
+                        [[0 1 2] [2 1 0]])))))
+
+(def board-1 [[:x :e :o]
+              [:x :e :e]
+              [:x :e :o]])
+
+(def board-2 [[:o :e :o]
+              [:o :o :e]
+              [:x :e :x]])
+
+(def board-3 [[:x :e :o]
+              [:x :x :e]
+              [:o :x :o]])
+
+(def solution-74
+  (fn [s]
+    (clojure.string/join
+     ","
+     (filter (fn [n]
+               (let [r (Math/sqrt (Integer/parseInt n))]
+                 (= (-> r int double) r)))
+             (clojure.string/split s #","))))
+  )
+
+(def solution-75
+  (fn [n]
+    (if (= n 1) 1
+        (letfn [(gcd [m]
+                  (->> (reverse (range 1 (inc m)))
+                       (filter #(= 0 (mod n %) (mod m %)))
+                       first))]
+          (count (filter #(= (gcd %) 1) (reverse (range 1 n)))))))
+  )
+
+(def out-76
+  (letfn
+     [(foo [x y] #(bar (conj x y) y))
+      (bar [x y] (if (> (last x) 10)
+                   x
+                   #(foo x (+ 2 y))))]
+     (trampoline foo [] 1)))
+
+(def solution-77
+  (fn [words]
+    (->> words
+         (group-by sort)
+         vals
+         (filter #(> (count %) 1))
+         (map set)
+         set))
   )
