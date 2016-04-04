@@ -325,7 +325,47 @@
              (concat s1 s2))))
   )
 
-(def solution-82
-  (fn []
-    )
+(defn chain2? [w1 w2]
+  (let []
+    (filter #(not (sw %)) w2)))
+
+(defn old-chain []
+  (fn [w1 w2]
+    (and (not= w1 w2)
+         (<= (Math/abs (- (count w1) (count w2))) 1)
+         (<= (count (clojure.set/difference (set w1) (set w2))) 1)))
   )
+
+;; cat -> cot -> coat -> oat -> hat -> hot -> hog -> dog
+
+(def solution-82
+  (fn [words]
+    (let [chain? (fn [w1 w2]
+                   (let [sw (set w1)]
+                     (<= (count (filter #(not (sw %)) w2)) 1)))
+          rows (repeat (count words) (into '() words))
+          chain (first
+                  (reduce (fn [ps cs]
+                            (for [p ps
+                                  c cs
+                                  :when (and (not (some #{c} p))
+                                             (chain? (last p) c))]
+                              (conj p c)))
+                          (map vector (first rows))
+                          (rest rows)))]
+      ;(if chain true false)
+      chain
+      ))
+  )
+
+(defn permute [n]
+  (let [rows (repeat n (range n))]
+    (reduce (fn [ps cs]
+              (for [p ps
+                    c cs
+                    :when (not (some #{c} p))]
+                (conj p c)
+                ))
+            (map vector (first rows))
+            (rest rows))
+    ))
