@@ -239,3 +239,93 @@
          (map set)
          set))
   )
+
+(def solution-78
+  (fn [f & args]
+    (loop [f (apply f args)]
+      (if (fn? f)
+        (recur (f))
+        f)))
+  )
+
+(def solution-79
+  (fn [graph]
+    (let [g (vec graph)
+          nodes
+          (->> g
+               (map #(-> % count range))
+               (map (fn [y v]
+                      (map (fn [x] [y x]) v))
+                    (range)))
+          paths
+          (loop [paths [ [[0 0]] ]
+                 ns (rest nodes)]
+            (if-not ns
+              paths
+              (recur
+               (apply concat
+                      (map (fn [path]
+                             (let [[px py] (last path)]
+                               (->> (first ns)
+                                    (map (fn [[x y]]
+                                           (when (or (= y py) (= y (inc py)))
+                                             (conj path [x y]))))
+                                    (filter identity))))
+                           paths))
+               (next ns))))]
+      (apply min
+       (map (fn [path] (apply + (map
+                                (fn [[x y]] (get (get g x) y))
+                                path)))
+            paths))))
+  )
+
+;; 2 1 -> 3 1 or 3 2
+;; 3 1 -> 4 1 or 4 2
+
+;; REALLY?
+(defn jbear-79 [t]
+  (first (reduce (fn [a s]
+                   (println a s)
+                   (map +
+                        s
+                        (map (fn [n]
+                               ;(println n)
+                               (apply min n))
+                             (partition 2 1 a))))
+                 (reverse t)))
+  )
+
+(def graph-1
+  '([1]
+    [2 4]
+    [5 1 4]
+    [2 3 4 5]))
+
+(def graph-2
+     '([3]
+      [2 4]
+     [9 9 3]
+    [9 9 9 4]
+   [4 6 6 7 8]
+  [5 1 5 5 1 4]))
+
+(def solution-80
+  (fn [n]
+    (= n
+       (->> (range 1 n)
+            (filter #(= 0 (mod n %)))
+            (apply +))))
+  )
+
+(def solution-81
+  (fn [s1 s2]
+    (set
+     (filter #(and (contains? s1 %) (contains? s2 %))
+             (concat s1 s2))))
+  )
+
+(def solution-82
+  (fn []
+    )
+  )
