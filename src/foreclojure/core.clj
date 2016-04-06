@@ -327,19 +327,32 @@
 
 ;; cat -> cot -> coat -> oat -> hat -> hot -> hog -> dog
 
+(defmacro dbg-prn [& body]
+  `(let [res# ~@body]
+     (println res#)
+     res#))
+
 (defn chain? [w1 w2]
-  (let [compare (fn  [w1 w2]
-                  (>= (count (filter false? (map = w1 w2))) 1))
-        [small large] (if (< (count w1) (count w2)) [w1 w2] [w2 w1])]
-    (some #{true}
-          (map
-           (partial compare small)
-           ;; oops -- wrong
-           (map (fn [i]
-                  (->> (map vector (range))
-                       (remove #(= (first %) i))
-                       (map second)))
-                large)))))
+  (let [compare (fn [w1 w2]
+                  (count (filter false? (map = w1 w2))))
+        l1 (count w1) l2 (count w2)
+        [small large] (if (< l1 l2) [w1 w2] [w2 w1])]
+    (cond
+      (= l1 l2) (<= (compare w1 w2) 1)
+
+      (= 1 (Math/abs (- l1 l2)))
+      (some #{0}
+            (map
+             (partial compare small)
+             (map (fn [i]
+                    (->> (map vector (range) large)
+                         (remove #(= (first %) i))
+                         (map second)
+                         (apply str)))
+                  (range (count large)))))
+
+      :else nil
+      )))
 
 (defn old-chain []
   (fn [w1 w2]
@@ -350,9 +363,28 @@
 
 (def solution-82
   (fn [words]
-    (let [chain? (fn [w1 w2]
-                   (let [sw (set w1)]
-                     (<= (count (filter #(not (sw %)) w2)) 1)))
+    (let [chain?
+          (fn [w1 w2]
+            (let [compare (fn [w1 w2]
+                            (count (filter false? (map = w1 w2))))
+                  l1 (count w1) l2 (count w2)
+                  [small large] (if (< l1 l2) [w1 w2] [w2 w1])]
+              (cond
+                (= l1 l2) (<= (compare w1 w2) 1)
+
+                (= 1 (Math/abs (- l1 l2)))
+                (some #{0}
+                      (map
+                       (partial compare small)
+                       (map (fn [i]
+                              (->> (map vector (range) large)
+                                   (remove #(= (first %) i))
+                                   (map second)
+                                   (apply str)))
+                            (range (count large)))))
+
+                :else nil
+                )))
           rows (repeat (count words) (into '() words))
           chain (first
                   (reduce (fn [ps cs]
@@ -363,9 +395,7 @@
                               (conj p c)))
                           (map vector (first rows))
                           (rest rows)))]
-      ;(if chain true false)
-      chain
-      ))
+      (if chain true false)))
   )
 
 (defn permute [n]
