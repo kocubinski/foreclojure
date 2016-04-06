@@ -1,12 +1,12 @@
 (ns foreclojure.core
-  (:use [clojure.test]))
+(:use [clojure.test]))
 
 ;; solution 58
 ;; imperative -- probably faster
 (defn solution-58-loop [& fns]
-  (fn [& args]
-    (let [fns (reverse fns)]
-      (loop [fs (next fns)
+(fn [& args]
+(let [fns (reverse fns)]
+    (loop [fs (next fns)
              res (apply (first fns) args)]
         (if fs
           (recur (next fs)
@@ -325,9 +325,21 @@
              (concat s1 s2))))
   )
 
-(defn chain2? [w1 w2]
-  (let []
-    (filter #(not (sw %)) w2)))
+;; cat -> cot -> coat -> oat -> hat -> hot -> hog -> dog
+
+(defn chain? [w1 w2]
+  (let [compare (fn  [w1 w2]
+                  (>= (count (filter false? (map = w1 w2))) 1))
+        [small large] (if (< (count w1) (count w2)) [w1 w2] [w2 w1])]
+    (some #{true}
+          (map
+           (partial compare small)
+           ;; oops -- wrong
+           (map (fn [i]
+                  (->> (map vector (range))
+                       (remove #(= (first %) i))
+                       (map second)))
+                large)))))
 
 (defn old-chain []
   (fn [w1 w2]
@@ -335,8 +347,6 @@
          (<= (Math/abs (- (count w1) (count w2))) 1)
          (<= (count (clojure.set/difference (set w1) (set w2))) 1)))
   )
-
-;; cat -> cot -> coat -> oat -> hat -> hot -> hog -> dog
 
 (def solution-82
   (fn [words]
@@ -363,7 +373,8 @@
     (reduce (fn [ps cs]
               (for [p ps
                     c cs
-                    :when (not (some #{c} p))]
+                    ;:when (not (some #{c} p))
+                    ]
                 (conj p c)
                 ))
             (map vector (first rows))
