@@ -1,5 +1,5 @@
 (ns foreclojure.core
-(:use [clojure.test]))
+  (:use [clojure.test]))
 
 ;; solution 58
 ;; imperative -- probably faster
@@ -413,20 +413,21 @@
 
 (def solution-84
   (fn [br]
-    (let [ps (into {} br)
-          ns (->> br (reduce conj '()) flatten set)]
-      ;; some logic errors with n -> v, but the structure for reducing the chains is (I think) sound
-      (reduce (fn [chains n]
-                (let [v (ps n)]
-                  (if-let [[i f]
-                           (->>
-                            chains
-                            (map (fn [i c] (condp = v
-                                            (peek c) [i #(->> % (cons v) vec)]
-                                            (first c) [i #(conj % v)]
-                                            nil))
-                                 (range))
-                            (filter identity) first)]
-                    (update-in chains [i] f)
-                    (conj chains n)))))))
+    (letfn [(chain [k m]
+              (println k m)
+              (if-let [v (m k)]
+                (cons k (chain v (dissoc m k)))
+                (list k)))
+            (build [m]
+              (if (seq m)
+                (if-let [c (chain (-> m first first) m)]
+                  (cons c (build (apply dissoc m c))))))
+            (expand [s]
+              (when (next s)
+                (cons (map #(vector (first s) %) (rest s))
+                      (expand (next s))))
+              )]
+                                        ;(->> (into {} br) build (map expand) (apply concat) (apply concat) set)
+      (build (into {} br))
+      ))
   )
