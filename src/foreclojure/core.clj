@@ -410,3 +410,23 @@
             (map vector (first rows))
             (rest rows))
     ))
+
+(def solution-84
+  (fn [br]
+    (let [ps (into {} br)
+          ns (->> br (reduce conj '()) flatten set)]
+      ;; some logic errors with n -> v, but the structure for reducing the chains is (I think) sound
+      (reduce (fn [chains n]
+                (let [v (ps n)]
+                  (if-let [[i f]
+                           (->>
+                            chains
+                            (map (fn [i c] (condp = v
+                                            (peek c) [i #(->> % (cons v) vec)]
+                                            (first c) [i #(conj % v)]
+                                            nil))
+                                 (range))
+                            (filter identity) first)]
+                    (update-in chains [i] f)
+                    (conj chains n)))))))
+  )
