@@ -411,23 +411,52 @@
             (rest rows))
     ))
 
+(defn chain [k m]
+  (println k m)
+  (if-let [v (m k)]
+    (dbg-prn (cons k (chain v (dissoc m k))))
+    (list k)))
+
 (def solution-84
   (fn [br]
     (letfn [(chain [k m]
-              (println k m)
               (if-let [v (m k)]
                 (cons k (chain v (dissoc m k)))
                 (list k)))
             (build [m]
               (if (seq m)
-                (if-let [c (chain (-> m first first) m)]
+                (if-let [c (apply max-key count (map #(chain % m) (keys m)))]
                   (cons c (build (apply dissoc m c))))))
             (expand [s]
               (when (next s)
                 (cons (map #(vector (first s) %) (rest s))
                       (expand (next s))))
               )]
-                                        ;(->> (into {} br) build (map expand) (apply concat) (apply concat) set)
-      (build (into {} br))
-      ))
+      (->> (into {} br) build (map expand) (apply concat) (apply concat) set)))
+  )
+
+;; ok, fuck you jbear
+(def jbear-84
+  (fn transitive-closure [rels]
+    (let [tc (reduce (fn [rs [a b]]
+                       (into rs (keep #(if (= b (first %))
+                                         [a (second %)])
+                                      rs)))
+                     rels rels)]
+      (if (= tc rels) tc (recur tc)))))
+
+;; my favorite
+(def adereth-84
+  #(loop [s %]
+     (let [n (into s
+                   (for [[a b] s [c d] s
+                         :when (= b c)]
+                     [a d]))]
+       (if (= n s) n (recur n)))))
+
+(def solution-85
+  (fn [s]
+    (let [v (vec s)]
+      (for [i (range (count s))]
+        (map #(vector (get v i) %) (drop i v)))))
   )
