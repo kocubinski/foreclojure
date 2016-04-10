@@ -455,8 +455,31 @@
        (if (= n s) n (recur n)))))
 
 (def solution-85
-  (fn [s]
-    (let [v (vec s)]
-      (for [i (range (count s))]
-        (map #(vector (get v i) %) (drop i v)))))
+  (fn power-set [s]
+    (set
+     (conj
+      (if (empty? s) #{}
+          (let [e (first s)
+                t (disj s e)
+                pt (power-set t)]
+            (cons t (concat pt (map #(conj % e) pt)))))
+      s)))
+  )
+
+(def solution-86
+  (fn happy [n]
+    (letfn [(digits [n]
+              (if (< n 10) (list (int n))
+                  (cons (mod n 10) (digits (Math/floor (/ n 10))))))]
+      (let [ns (digits n)
+            s (reduce #(+ %1 (Math/pow %2 2)) (Math/pow (first ns) 2) (rest ns))]
+        (if (= n 1)
+          true
+          (if (= n 4) false
+              (recur (int s)))))))
+  )
+
+(def s-87
+  (fn [& ss]
+    )
   )
