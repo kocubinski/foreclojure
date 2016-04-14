@@ -479,7 +479,20 @@
               (recur (int s)))))))
   )
 
-(def s-87
-  (fn [& ss]
-    )
+(def graph-89-1
+  [[:a :b] [:a :b] [:a :c] [:c :a]
+   [:a :d] [:b :d] [:c :d]])
+
+(def s-89
+  (fn [g]
+    (let [vs (set (flatten g))]
+      (map (fn [v] (count (filter #(some #{v} %) g))) vs)))
+  )
+
+(def s-89-golf
+  (fn [g]
+    (or (= (count g) 1)
+        (->> (set (flatten g))
+             (map (fn [v] (count (filter #(some #{v} %) g))))
+             (every? even?))))
   )
