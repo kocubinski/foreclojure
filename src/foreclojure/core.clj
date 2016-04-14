@@ -496,3 +496,17 @@
              (map (fn [v] (count (filter #(some #{v} %) g))))
              (every? even?))))
   )
+
+(def s-91-connected
+  #{[1 2] [2 3] [3 1]
+    [4 5] [5 6] [6 4] [3 4]})
+
+(def s-91-unconnected
+  #{[1 2] [2 3] [3 1]
+    [4 5] [5 6] [6 4]})
+
+(def s-91
+  (fn [g]
+    (let [vs (set (flatten g))]
+      (map (fn [v] ))))
+  )
