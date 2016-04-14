@@ -507,6 +507,48 @@
 
 (def s-91
   (fn [g]
-    (let [vs (set (flatten g))]
-      (map (fn [v] ))))
+    (let [vs (-> g vec flatten set)]
+      (reduce (fn [ss v]
+                (println v)
+                (let [ns (->> g (filter #(some #{v} %)) flatten set)
+                      ff (first (filter #(seq (clojure.set/intersection ns %)) ss))]
+                  (println ss ff ns)
+                  (if ff (assoc-in ss [(.indexOf ss ff)] (clojure.set/union ns ff))
+                      (conj ss ns))))
+              [] vs)))
   )
+
+(def s-91-golf
+  (fn [g]
+    (= 1
+       (count
+        (reduce
+         (fn [ss v]
+           (let [ns (->> g (filter #(some #{v} %)) flatten set)
+                 ff (first (filter #(seq (clojure.set/intersection ns %)) ss))]
+             (if ff (assoc-in ss [(.indexOf ss ff)] (clojure.set/union ns ff))
+                 (conj ss ns))))
+         [] (-> g vec flatten set)))))
+  )
+
+(def s-92
+  (fn [ns]
+    (let [vs {\I 1 \V 5 \X 10 \L 50 \C 100 \D 500 \M 1000 \0 0}]
+      (:num
+       (reduce
+        (fn [{:keys [num last times] :as s} n]
+          (let [subtract? (< (vs last) (vs n))]
+            (if (= n last)
+              (update-in s [:times] inc)
+              (assoc s :last n :times (if subtract? 0 1)
+                     :num (+ num (if subtract?
+                                   (- (vs n) (* times (vs last)))
+                                   (* times (vs last))))))))
+        {:num 0 :last (first ns) :times 1}
+        (rest (str ns 0)))))))
+
+(def s-93
+  (fn [seqs]
+    (letfn [(unwind [[s & more :as ss]]
+              (if seq? s
+                  ))])))
