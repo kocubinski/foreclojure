@@ -548,7 +548,11 @@
         (rest (str ns 0)))))))
 
 (def s-93
-  (fn [seqs]
-    (letfn [(unwind [[s & more :as ss]]
-              (if seq? s
-                  ))])))
+  (fn [seq]
+    (letfn [(unwind [[s & more :as seq]]
+              (println "s:" s "more:" more "seq:" seq)
+              (Thread/sleep 300)
+              (when seq
+                (if (sequential? s) (unwind (concat s more))
+                    (cons s (unwind more)))))]
+      (map unwind seq))))
