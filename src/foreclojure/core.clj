@@ -550,9 +550,28 @@
 (def s-93
   (fn [seq]
     (letfn [(unwind [[s & more :as seq]]
-              (println "s:" s "more:" more "seq:" seq)
-              (Thread/sleep 300)
               (when seq
-                (if (sequential? s) (unwind (concat s more))
-                    (cons s (unwind more)))))]
-      (map unwind seq))))
+                (if-not (sequential? (first s))
+                  (cons s (unwind more))
+                  (unwind (concat s more)))))]
+      (unwind seq))))
+
+(def s-94
+  (fn [b]
+    )
+  )
+
+(deftest s-94-test-1
+  (is
+   (= (s-94 ["      "
+             " ##   "
+             " ##   "
+             "   ## "
+             "   ## "
+             "      "])
+      ["      "
+       " ##   "
+       " #    "
+       "    # "
+       "   ## "
+       "      "])))
