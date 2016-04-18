@@ -558,20 +558,99 @@
 
 (def s-94
   (fn [b]
-    )
+    (let [w (-> b first count)
+          h (-> b count)
+          ds [-1 0 1]]
+      (letfn [(neighbors [[x y]]
+                (filter (fn [[x2 y2]]
+                          (and (not (and (= x x2) (= y y2)))
+                               (and (not= x2 -1) (< x2 w))
+                               (and (not= y2 -1) (< y2 h))))
+                        (for [dx ds dy ds]
+                          [(+ x dx) (+ y dy)])))
+              (next [[x y] ns]
+                (let [live
+                      (->> ns
+                           (map (fn [[x y]] (-> b (get x) (get y))))
+                           (filter #(= % \#))
+                           count)]
+                  (if (= \space (-> b (get x) (get y)))
+                    (if (= live 3) \# \space)
+                    (condp >= live
+                      1 \space
+                      3 \#
+                      \space))))]
+        (->>
+         (for [x (range w)
+               y (range h)]
+           [x y])
+         (map #(next % (neighbors %)))
+         (partition w)
+         (map (partial apply str))
+         ))))
   )
 
-(deftest s-94-test-1
-  (is
-   (= (s-94 ["      "
-             " ##   "
-             " ##   "
-             "   ## "
-             "   ## "
-             "      "])
+(def s-94-g-1
+  ["      "
+   " ##   "
+   " ##   "
+   "   ## "
+   "   ## "
+   "      "]
+  )
+
+(def s-94-g2
+  ["     "
+   "     "
+   " ### "
+   "     "
+   "     "])
+
+(defn s-94-test-1 []
+  (= (s-94
       ["      "
        " ##   "
-       " #    "
-       "    # "
+       " ##   "
        "   ## "
-       "      "])))
+       "   ## "
+       "      "])
+     ["      "
+      " ##   "
+      " #    "
+      "    # "
+      "   ## "
+      "      "]))
+
+(def s-95
+  (fn [t]
+    (letfn [(step [s]
+              (if (or (not= 3 (count s))
+                      (some #(and (not (nil? %)) (not (sequential? %))) (rest s)))
+                (list false)
+                (->> s (filter sequential?) (mapcat step))))]
+      (empty? (step t))))
+  )
+
+(def s-95-better
+  (fn tree? [t]
+    (or (nil? t)
+        (and
+         (coll? t)
+         (= 3 (count t))
+         (every? tree? (next t)))))
+  )
+
+(def s-96
+  (fn [[_ left right]]
+    (= left
+       ((fn mirror [t]
+          (when t
+            (cons (first t) (reverse (map mirror (next t))))))
+        right)))
+  )
+
+(def s-97
+  (fn [n]
+    (reduce #(conj % (* %2 (last %))) [1]
+            (map #(/ %1 %2) (reverse (range 1 n)) (range 1 n))))
+  )
