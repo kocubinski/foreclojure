@@ -654,3 +654,22 @@
     (reduce #(conj % (* %2 (last %))) [1]
             (map #(/ %1 %2) (reverse (range 1 n)) (range 1 n))))
   )
+
+(def s-98
+  (fn [f s]
+    (set (map set (vals (group-by f s)))))
+  )
+
+
+(def s-100
+  (fn [& ns]
+    (let [min (apply min ns)]
+      (->> (iterate (partial + min) min)
+           (filter #(apply = 0 (map (partial mod %) ns)))
+           first)))
+  )
+
+(def s-101
+  (fn [x y]
+    )
+  )
