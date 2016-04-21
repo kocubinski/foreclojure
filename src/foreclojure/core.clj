@@ -669,7 +669,74 @@
            first)))
   )
 
-(def s-101
+;; levenshtein distance
+
+;; very inefficient - from wikipedia
+
+(def s-101-1
+  (memoize
+   (fn l-dist [x y]
+     (let [lx (count x) ly (count y)
+           bx (butlast x) by (butlast y)
+           c (if (= (last x) (last y)) 0 1)]
+       (condp = 0
+         lx ly
+         ly lx
+         (min (inc (l-dist bx y))
+              (inc (l-dist x by))
+              (+ c (l-dist bx by)))))))
+  )
+
+(defn deep-recursion-1 []
+  (let [x [:a :b :c]
+        y [1 2 3]
+        z ["a" "b" "c"]]
+    (letfn [(step [x y z]
+              (when (and x y z)
+                (println x y z)
+                (cons [(first x) (first y) (first z)]
+                      (concat (step (next x) y z)
+                              (step x (next y) z)
+                              (step x y (next z))))))]
+      (step x y z)
+      ;(for [xx x yy y zz z] (list xx yy zz))
+      ))
+  )
+
+(def s-101-2
   (fn [x y]
-    )
+    (->
+     (reduce (fn [[j p] c]
+               (println "outer" j p c)
+               [(inc j)
+                (second
+                 (reduce (fn [[i r] d]
+                           (println "inner" i r d)
+                           (let [pi (dec i)]
+                             [(inc i)
+                              (conj r (if (= d c)
+                                        (get p pi)
+                                        (inc (min (get r pi) (get p i) (get p pi)))))]))
+                         [1 [j]] x))])
+             [1 (vec (-> x count inc range))] y)
+     last last))
+  )
+
+(def s-102
+  (fn [s]
+    (apply str
+           (reduce (fn [[s b] c] [(str s (if (= \- b) "" b))
+                                 (if (= \- b) (Character/toUpperCase c) c)]) ["" ""] s)))
+  )
+
+(defn permute [n s]
+  (reduce (fn [ps cs]
+            (for [p ps
+                  c cs
+                  ;;:when (not (some #{c} p))
+                  ]
+              (conj p c)
+              ))
+          (map vector (first rows))
+          (rest rows))
   )

@@ -1,0 +1,32 @@
+** Deep Recursion
+
+*** s-101-1
+   Taken from https://en.wikipedia.org/wiki/Levenshtein_distance#Computing_Levenshtein_distance
+
+#+BEGIN_SRC clojure
+(def s-101-1
+  (fn l-dist [x y]
+    (let [lx (count x) ly (count y)
+          bx (butlast x) by (butlast y)]
+      (condp = 0
+        lx ly
+        ly lx
+        (min (inc (l-dist bx y))
+             (inc (l-dist x by))
+             (+ (if (= (last x) (last y)) 0 1) (l-dist bx by))))))
+  )
+#+END_SRC
+
+**** x = sitting, y = kitten
+
+#+BEGIN_SRC clojure
+(inc (l-dist (butlast x) y))
+;; sitting, kitten -> sittin, kitten -> sitti, kitten -> sitt, kitten -> .. (count "kitten") -> 6
+
+(inc (l-dist x (butlast y)))
+;; sitting, kitten -> sitting, kitte -> sitting, kitt -> .. (count "sitting") -> 7
+
+(+ (if (= (last x) (last y)) 0 1) (l-dist bx by))
+;; sitting, kitten [1] -> sittin, kitte [2] -> sitti, kitt [3] -> sitt, kit [3] -> sit, ki [4]
+
+#+END_SRC
