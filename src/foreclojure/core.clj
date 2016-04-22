@@ -769,16 +769,16 @@
 ;; + 2 path if dist > 1 and (mod dist 2) = 0
 ;; (= (/ (Math/log (/ x y)) (Math/log 2)) (an integer) -- can half to solution
 
+;; needs early-out with repetition checking
 (def s-106
   (fn [x y]
-    ((fn step [n]
+    ((fn step [a b n]
        (let [m Integer/MAX_VALUE
-             f #(inc (step %))]
-         (Thread/sleep 100)
-         (println n)
+             f #(inc (step b n %))]
          (if (= n y) 1
              (min (if (< n y) (f (* n 2)) m)
-                  (if (and (> n y) (even? n)) (f (/ n 2)) m)
+                  (if (and (> n y) (even? n)
+                           (not= a n)) (f (/ n 2)) m)
                   (if (< n y) (f (+ 2 n)) m)))))
-     x))
+     0 0 x))
   )
