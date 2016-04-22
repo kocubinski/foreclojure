@@ -729,14 +729,56 @@
                                  (if (= \- b) (Character/toUpperCase c) c)]) ["" ""] s)))
   )
 
-(defn permute [n s]
-  (reduce (fn [ps cs]
-            (for [p ps
-                  c cs
-                  ;;:when (not (some #{c} p))
-                  ]
-              (conj p c)
-              ))
-          (map vector (first rows))
-          (rest rows))
+(def s-103
+  (fn [n s]
+    (set
+     (reduce (fn [ks xs]
+               (for [k ks x xs
+                     :when (not (get k x))]
+                 (conj k x)))
+             (map (comp set list) s)
+             (repeat (dec n) s))))
+  )
+
+(def s-104
+  (fn [s]
+    (apply str
+           (reverse
+            (map
+             (fn [[x y z] n]
+               (apply str
+                      (cond
+                        (< n 4) (repeat n x)
+                        (= n 4) [x y]
+                        (= n 5) [y]
+                        (< n 9) (cons y (repeat (mod n 5) x))
+                        (= n 9) [x z])))
+             (partition-all 3 2 "IVXLCDM")
+             (reverse (map #(Character/digit % 10) (str s)))))))
+  )
+
+(def s-105
+  (fn [xs]
+    (second
+     (reduce (fn [[k m] x] (if (keyword? x)
+                            [x (assoc m x [])]
+                            [k (assoc m k (conj (get m k) x))]))
+             [nil {}] xs)))
+  )
+
+;; + 2 path if dist > 1 and (mod dist 2) = 0
+;; (= (/ (Math/log (/ x y)) (Math/log 2)) (an integer) -- can half to solution
+
+(def s-106
+  (fn [x y]
+    ((fn step [n]
+       (let [m Integer/MAX_VALUE
+             f #(inc (step %))]
+         (Thread/sleep 100)
+         (println n)
+         (if (= n y) 1
+             (min (if (< n y) (f (* n 2)) m)
+                  (if (and (> n y) (even? n)) (f (/ n 2)) m)
+                  (if (< n y) (f (+ 2 n)) m)))))
+     x))
   )
