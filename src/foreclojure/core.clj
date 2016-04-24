@@ -773,12 +773,51 @@
 (def s-106
   (fn [x y]
     ((fn step [a b n]
+       (Thread/sleep 50)
+       (println n)
        (let [m Integer/MAX_VALUE
              f #(inc (step b n %))]
          (if (= n y) 1
              (min (if (< n y) (f (* n 2)) m)
                   (if (and (> n y) (even? n)
                            (not= a n)) (f (/ n 2)) m)
-                  (if (< n y) (f (+ 2 n)) m)))))
+                  (if (< n y) (f (+ 2 n)) m))
+             )))
      0 0 x))
   )
+
+(def s-106-1
+  (fn [x y]
+    (let [a #(+ % 2)
+          d #(/ % 2)
+          m #(* % 2)
+          max 10
+          path (atom max)]
+      ((fn step [i o n]
+         (let [f #(step (inc i) %1 %2)]
+           (if (or (= n y) (>= i @path))
+             (reset! path i)
+             (min (if (not= o d) (f m (m n)) max)
+                  (if (and (not= o m) (even? n)) (f d (d n)) max)
+                  (f a (a n))))))
+       1 nil x)))
+  )
+
+(def s-106-austintaylor
+  (fn [a b]
+    (loop [paths [a] i 1]
+      (println paths i)
+      (if (some #(= % b) paths)
+        i
+        (recur (mapcat #(concat [(* 2 %) (+ 2 %)]
+                                (if (zero? (mod % 2)) [(/ % 2)] [])) paths) (inc i))))))
+
+(def s-106-condotti
+  (fn [s e]
+    ((fn [xs n]
+       (if (some #(= % e) xs) n
+           (recur (concat (map #(* % 2) xs)
+                          (map #(+ % 2) xs)
+                          (keep #(if (even? %) (/ % 2)) xs))
+                  (inc n))))
+     [s] 1)))
