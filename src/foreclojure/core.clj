@@ -826,7 +826,29 @@
 
 (def s-108
   (fn [& seqs]
-    (first
-     (map (fn [& xs]
-            (when ())))))
+    (letfn [(search [[x :as s] y]
+              (when s
+                (cond (< x y) (search (next s) y)
+                      (= x y) true
+                      (> x y) false)))]
+      (->>
+       (apply map
+              (fn [& xs]
+                (first (filter (fn [x] (every? #(search % x) seqs)) xs)))
+              seqs)
+       (filter identity)
+       first)))
+  )
+
+(def s-110
+  (fn [s]
+    (letfn [(pronounce [s]
+              (flatten
+               (reduce
+                (fn [[v i m] n]
+                  (if (= n m)
+                    [v (inc i) m]
+                    [(conj v i m) 1 n]))
+                [[] 1 (first s)] (rest s))))]
+      ((fn [s] (lazy-seq (cons (pronounce s) (pronounce)))))))
   )
