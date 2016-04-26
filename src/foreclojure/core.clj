@@ -772,18 +772,16 @@
 ;; needs early-out with repetition checking
 (def s-106
   (fn [x y]
-    ((fn step [a b n]
-       (Thread/sleep 50)
-       (println n)
-       (let [m Integer/MAX_VALUE
-             f #(inc (step b n %))]
-         (if (= n y) 1
-             (min (if (< n y) (f (* n 2)) m)
-                  (if (and (> n y) (even? n)
-                           (not= a n)) (f (/ n 2)) m)
-                  (if (< n y) (f (+ 2 n)) m))
-             )))
-     0 0 x))
+    (let [m Integer/MAX_VALUE
+          path (atom 10)]
+      ((fn step [i n]
+         (let [f (partial step (inc i))]
+           (if (or (= n y) (>= i @path))
+             (reset! path i)
+             (min (f (* n 2))
+                  (if (even? n) (f (/ n 2)) m)
+                  (f (+ 2 n))))))
+       1 x)))
   )
 
 (def s-106-1
@@ -821,3 +819,14 @@
                           (keep #(if (even? %) (/ % 2)) xs))
                   (inc n))))
      [s] 1)))
+
+(def s-107
+  (fn [n] #(int (Math/pow % n)))
+  )
+
+(def s-108
+  (fn [& seqs]
+    (first
+     (map (fn [& xs]
+            (when ())))))
+  )
