@@ -842,13 +842,40 @@
 
 (def s-110
   (fn [s]
-    (letfn [(pronounce [s]
-              (flatten
-               (reduce
-                (fn [[v i m] n]
-                  (if (= n m)
-                    [v (inc i) m]
-                    [(conj v i m) 1 n]))
-                [[] 1 (first s)] (rest s))))]
-      ((fn [s] (lazy-seq (cons (pronounce s) (pronounce)))))))
+    (rest
+     (iterate (fn [s]
+                (flatten
+                 (reduce
+                  (fn [[v i m] n]
+                    (if (= n m)
+                      [v (inc i) m]
+                      [(conj v i m) 1 n]))
+                  [[] 1 (first s)] (rest s))))
+              s)))
   )
+
+(def s-111
+  (fn [w b]
+    (->> b
+         (map #(filter (partial not= \space) %)) ; remove spaces
+         ((fn [b] (concat b (apply map (fn [& xs] xs) b)))) ; append verticals
+         (mapcat #(partition-by (partial = \#) %)) ; split by #
+         (some (fn [x]
+                 (and (= (count x) (count w))
+                      (every? identity (map #(or (= %1 %2) (= %2 \_)) w x))))) ; compare each to input word
+         true?))
+  )
+
+(def s-112
+  (fn [n s]
+    ((fn step [sum [f :as s]]
+        (println sum f s)
+        (when (and s (<= sum n))
+          ;(cons f (step (if (integer? f) (+ sum f) sum) (next s)))
+          (if (integer? f)
+            (cons f (step (+ sum f) (next s)))
+            (step sum ))
+          ))
+     0 s)))
+
+;; how to recurs down all nested seqs maintaing same structure with return?
