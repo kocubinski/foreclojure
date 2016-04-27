@@ -868,14 +868,24 @@
 
 (def s-112
   (fn [n s]
-    ((fn step [sum [f :as s]]
-        (println sum f s)
-        (when (and s (<= sum n))
-          ;(cons f (step (if (integer? f) (+ sum f) sum) (next s)))
-          (if (integer? f)
-            (cons f (step (+ sum f) (next s)))
-            (step sum ))
-          ))
-     0 s)))
+    (or
+     (let [sum (atom 0)]
+       ((fn step [[f :as s]]
+          (when (integer? f) (swap! sum + f))
+          (when (and s (<= @sum n))
+            (cons (if (sequential? f) (step f) f)
+                  (step (next s)))))
+        s))
+     '()))
+  )
 
-;; how to recurs down all nested seqs maintaing same structure with return?
+;; muuuuch better.
+(def s-112-daowen
+  (fn horrible [x node]
+    (if-let [h (first node)]
+      (cond
+        (coll? h) (if-let [t (horrible x h)] (list t))
+        (<= h x) (cons h (horrible (- x h) (rest node)))
+        :else '()))))
+
+;; TODO -- iterate down nested seqs with both daowens and (cons (recur) (recur)) pattern
