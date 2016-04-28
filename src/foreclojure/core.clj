@@ -889,3 +889,25 @@
         :else '()))))
 
 ;; TODO -- iterate down nested seqs with both daowens and (cons (recur) (recur)) pattern
+
+(def s-114
+  (fn step [n p [h :as s]]
+    (let [n (if (p h) (dec n) n)]
+      (when-not (= n 0) (cons h (step n p (next s))))))
+  )
+
+(def s-115
+  (fn [n]
+    (let [l (count (str n))
+          [left right] (->> (str n) (map #(Character/digit % 10))
+                            (split-at (int (/ l 2))))
+          f #(apply + %)]
+      (cond
+        (= l 1) true
+        (odd? l) (= (f left) (f (rest right)))
+        (even? l) (= (f left) (f right)))))
+  )
+
+;; remember every non-prime number is composed of prime factors
+(def s-116
+  (fn []))
