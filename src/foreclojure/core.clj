@@ -890,6 +890,30 @@
 
 ;; TODO -- iterate down nested seqs with both daowens and (cons (recur) (recur)) pattern
 
+(defn double-frame [[f :as s]]
+  (when s
+    (cons (if (sequential? f) (double-recur f) f)
+          (double-recur (next s)))))
+
+(defn single-frame [[h :as s]]
+  (println h s)
+  (when s
+    (if (coll? h)
+      (list (single-frame h))
+      (cons h (single-frame (next s))))))
+
+
+(def a-nested-seq [1 2 [3 [4 [5 [6 [7 8]] 9 10]] 11] 12])
+
+(def s-113
+  (fn [& xs]
+    (reify
+      Object
+      (toString [_] (clojure.string/join ", " (sort xs)))
+      clojure.lang.Seqable
+      (seq [_] (when xs (distinct xs)))))
+  )
+
 (def s-114
   (fn step [n p [h :as s]]
     (let [n (if (p h) (dec n) n)]
@@ -911,3 +935,8 @@
 ;; remember every non-prime number is composed of prime factors
 (def s-116
   (fn []))
+
+(def s-119
+  (fn [xo b]
+    )
+  )
