@@ -892,8 +892,8 @@
 
 (defn double-frame [[f :as s]]
   (when s
-    (cons (if (sequential? f) (double-recur f) f)
-          (double-recur (next s)))))
+    (cons (if (sequential? f) (double-frame f) f)
+          (double-frame (next s)))))
 
 (defn single-frame [[h :as s]]
   (println h s)
@@ -967,4 +967,84 @@
     (lazy-seq
      (when s
        (cons (f x) (not-map f (next s))))))
+  )
+
+(def s-119
+  (fn [p b]
+    (let [move? #(some #{%} [[:e p p ] [p :e p] [p p :e]])
+          b (map-indexed #(map-indexed (partial vector %1) %2) b)]
+      (->> (concat b (apply map (fn [& xs] xs) b)
+                   (list (map nth b [0 1 2])) (list (map nth b [2 1 0])))  ;; all lines
+           (filter (comp move? (partial map last)))  ;; filter winnable
+           (mapcat identity)  ;; we just want :e's now -- un-nest one level
+           (filter #(= :e (last %))) ;; filter :e's
+           (map (partial take 2))  ;; get coords of :e
+           set)))
+  )
+
+(def s-120
+  (fn [ns]
+    (count
+     (filter (fn [n] (< n (apply + (map #(Math/pow (Character/digit % 10) 2) (str n)))))
+             ns))))
+
+(def s-121
+  (fn [fm]
+    (fn [args]
+      (let [ops (zipmap '(+ - * /) [+ - * /])]
+        ((fn step [[o & xs]]
+           (apply (ops o) (map #(cond
+                                  (symbol? %) (args %)
+                                  (coll? %) (step %)
+                                  :else %)
+                               xs)))
+         fm))))
+  )
+
+(def s-122
+  (fn [b]
+    (->> (reverse b) (map-indexed #(* (Math/pow 2 %1) (Character/digit %2 2)))
+         (reduce +) int))
+  )
+
+(def s-122-jbear
+  (fn [b]
+    (reduce #(+ (* %1 2)
+                (if (= %2 \1) 1 0))
+            0 b)
+    (reduce (fn [a b]
+              (println a b)
+              (+ (* a 2)
+                 (if (= b \1) 1 0)))
+            0 b)
+    )
+  )
+
+(def s-124-board-1
+  '[[e e e e]
+    [e w b e]
+    [e b w e]
+    [e e e e]])
+
+(def s-124
+  (fn [b c]
+    (letfn [(add [[x1 y1] [x2 y2]] [(+ x1 x2) (+ y1 y2)])
+            (look [p d]
+              (let [flip (add p d)]
+                (condp = (get-in b flip)
+                  c (list p)
+                  (if ( = c 'w) 'b 'w) (cons p (look flip d))
+                  (list false))))]
+      (->>
+       (for [dx [-1 0 1] dy [-1 0 1]
+             p (for [x (range 3) y (range 3)
+                     :when (= (get-in b [x y]) (if (= c 'w) 'b 'w))]
+                 [x y])
+             :let [e (add p [dx dy])]
+             :when (= 'e (get-in b e))]
+         [e p [dx dy]])
+       (map (fn [[e p d]] (cons e (look p (map (partial * -1) d)))))
+       (filter (partial not-any? false?))
+       (map (fn [[p & fs]] [p (set fs)]))
+       (into {}))))
   )
