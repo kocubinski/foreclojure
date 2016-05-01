@@ -934,9 +934,37 @@
 
 ;; remember every non-prime number is composed of prime factors
 (def s-116
-  (fn []))
+  (fn [n]
+    (letfn [(prime? [n] (and (> n 1)
+                                (not-any? #(= (mod n %) 0)
+                                          (take-while (partial not= 1) (iterate dec (dec n))))))
+            (first-prime [ns] (first (filter prime? ns)))]
+      (and (> n 3) (prime? n)
+           (= n (/ (+ (first-prime (iterate dec (dec n))) (first-prime (iterate inc (inc n))))
+                   2)))))
+  )
 
-(def s-119
-  (fn [xo b]
-    )
+(def s-117
+  (fn [b]
+    (let [[x y] (->> b (map #(vector % (.indexOf %2 "M")) (range))
+                     (filter (fn [[_ m]] (not= -1 m))) first)
+          seen (transient #{})]
+      (true?
+       ((fn step [x y]
+          (let [s (get (get b x) y)]
+            (when (and s (not= s \#) (not (seen [x y])))
+              (conj! seen [x y])
+              (if (= s \C) true
+                  (some true? (list (step (inc x) y)
+                                    (step (dec x) y)
+                                    (step x (dec y))
+                                    (step x (inc y))))))))
+        x y))))
+  )
+
+(def s-118
+  (fn not-map [f [x :as s]]
+    (lazy-seq
+     (when s
+       (cons (f x) (not-map f (next s))))))
   )
