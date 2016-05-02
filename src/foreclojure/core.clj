@@ -1071,9 +1071,9 @@
 (def s-127
   (fn [ns]
     (letfn [(most [f g coll] (reduce (fn [m n] (if (f (g n) (g m)) n m)) coll))
-            (gcd [x y] (let [[x y] (sort [x y])
+            (gcd [x y] (let [[x y] (sort [(Math/abs x) (Math/abs y)])
                              r (if (zero? x) 0 (mod y x))]
-                         (if (zero? r) (Math/abs x) (gcd r x))))
+                         (if (zero? r) x (gcd r x))))
             (area [[x1 y1] [x2 y2] [x3 y3]]
               (let [a (/ (+ (- (* x1 y2) (* x2 y1))
                             (- (* x2 y3) (* x3 y2))
@@ -1081,7 +1081,24 @@
                     b (/ (+ (gcd (- x1 x2) (- y1 y2))
                             (gcd (- x2 x3) (- y2 y3))
                             (gcd (- x3 x1) (- y3 y1))) 2)]
-                (- (inc a) (double b))))]
-
-      ))
-  )
+                (- (inc a) (double b))))
+            (bits [n] (->> (Integer/toBinaryString n)
+                           (map-indexed vector)
+                           (filter #(= \1 (second %)))
+                           (map first)))]
+      (let [ps (->> ns (map-indexed (fn [i n] [i (bits n)]))
+                    (mapcat (fn [[x ys]] (map (partial vector x) ys))))]
+        (->> (range (int (Math/pow 2 (count ps))) 2 -1)
+             (map bits)
+             (map (partial map (partial nth ps)))
+             ;(map #(list (most < first %) (most < second %) (most > first %) ( > second %)))
+             (map (fn [ps] [ps (-> (list (most < first ps) (most < second ps)
+                                        (most > first ps) (most > second ps))
+                                  set vec)]))
+             (filter (fn [[_ vs]] (= 3 (count vs))))
+             (map (fn [[ps [v1 v2 v3]]]
+                    (let [a (-> (area v3 v2 v1) int Math/abs)]
+                      (if (= a (count ps)) a 0))))
+             (apply max))
+       ))
+  ))
