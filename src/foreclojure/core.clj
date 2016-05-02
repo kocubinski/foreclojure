@@ -1048,3 +1048,40 @@
        (map (fn [[p & fs]] [p (set fs)]))
        (into {}))))
   )
+
+(def s-125
+  (fn [] (let [q \" [s1 s2] ["(fn [] (let [[s1 s2] [" "]] (str s1 \" s2 s2 s2))"]] (str s1 \" s1 s2 s2)))
+  )
+
+(def s-125
+  (fn [] (eval '(str))))
+
+(def s-125
+  (fn [] ((fn [s] (str s (char 32) (char 34) s (char 34) (char 41) (char 41))) "(fn [] ((fn [s] (str s (char 34) (char 32) s (char 34) (char 41) (char 41)))"))
+  )
+
+;; proces all combinations
+;; find min & max across x,y - 4 points
+;; two points should be identical (if not, not a triange)
+;; calculate area -- if not equal to (count 1s), not well-formed triangle
+;; max area wins
+
+;;http://mathforum.org/library/drmath/view/55169.html
+
+(def s-127
+  (fn [ns]
+    (letfn [(most [f g coll] (reduce (fn [m n] (if (f (g n) (g m)) n m)) coll))
+            (gcd [x y] (let [[x y] (sort [x y])
+                             r (if (zero? x) 0 (mod y x))]
+                         (if (zero? r) (Math/abs x) (gcd r x))))
+            (area [[x1 y1] [x2 y2] [x3 y3]]
+              (let [a (/ (+ (- (* x1 y2) (* x2 y1))
+                            (- (* x2 y3) (* x3 y2))
+                            (- (* x3 y1) (* x1 y3))) 2)
+                    b (/ (+ (gcd (- x1 x2) (- y1 y2))
+                            (gcd (- x2 x3) (- y2 y3))
+                            (gcd (- x3 x1) (- y3 y1))) 2)]
+                (- (inc a) (double b))))]
+
+      ))
+  )
