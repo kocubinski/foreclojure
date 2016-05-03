@@ -113,3 +113,23 @@
                 )]
         ms)))
   )
+
+(def s-127-vectors
+  (fn [ns]
+    (let [search-vs (map (fn [a] (map #(vector (Math/round (Math/cos (Math/toRadians (+ a %))))
+                                              (Math/round (Math/sin (Math/toRadians (+ a %)))))
+                                     [90 0 135]))
+                         (range 0 360 45))
+          ms (->> ns (map-indexed (fn [i n] [i (Integer/toBinaryString n)]))
+                  (mapcat (fn [[x ys]] (map-indexed (fn [y b] [[x y] b]) ys)))
+                  (filter #(= \1 (second %))) (into {}))]
+      (letfn [(mineral [p] (get ms p 0))
+              (add [[x1 y1] [x2 y2]] [(+ x1 x2) (+ y1 y2)])
+              (search [[x y :as p] v f]
+                (if (= p f) 0
+                    (when (ms p) ())))
+              (tri [[x y :as p] [v1 v2 v3 :as vs]]
+                (if (and (mineral (add p v1))
+                         (mineral (add p v2))
+                         )))])
+      mineral)))
