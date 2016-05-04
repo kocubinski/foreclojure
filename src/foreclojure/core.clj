@@ -1059,3 +1059,9 @@
 (def s-125
   (fn [] ((fn [s] (str s (char 32) (char 34) s (char 34) (char 41) (char 41))) "(fn [] ((fn [s] (str s (char 34) (char 32) s (char 34) (char 41) (char 41)))"))
   )
+
+(def s-128
+  (fn [[s r]]
+    {:suit ((zipmap "DHCS" [:diamond :heart :club :spade]) s)
+     :rank ((zipmap (concat (apply str (range 2 10)) "TJQKA") (range)) r)})
+  )
