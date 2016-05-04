@@ -1,0 +1,1 @@
+(ns foreclojure.core)

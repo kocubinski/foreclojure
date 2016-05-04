@@ -1,10 +1,15 @@
 # foreclojure
 
-A Clojure library designed to ... well, that part is up to you.
+A collection of my solutions and other musings around [4clojure](http://4clojure.com).
 
-## Usage
+## ClojureScript
 
-FIXME
+Built with [figwheel](://github.com/bhauman/lein-figwheel) and [nREPL for a cljs repl](https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl).  Steps to start:
+
+    (use 'figwheel-sidecar.repl-api)
+    (start-figwheel!)
+    (cljs-repl)
+    
 
 ## License
 
