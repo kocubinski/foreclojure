@@ -4,7 +4,7 @@ A collection of my solutions and other musings around [4clojure](http://4clojure
 
 ## ClojureScript
 
-Built with [figwheel](://github.com/bhauman/lein-figwheel) and [nREPL for a cljs repl](https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl).  Steps to start:
+Built with [figwheel](http://github.com/bhauman/lein-figwheel) and [nREPL for a cljs repl](https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl).  Steps to start:
 
     (use 'figwheel-sidecar.repl-api)
     (start-figwheel!)

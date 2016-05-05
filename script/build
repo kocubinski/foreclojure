@@ -1,0 +1,6 @@
+#/bin/zsh
+browserify node_modules/twojs-browserify/two.clean.js -o resources/public/js/deps.js
+
+CSS=resources/public/css
+mkdir $CSS
+cp -f node_modules/purecss/build/pure.css $CSS

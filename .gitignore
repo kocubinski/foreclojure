@@ -12,3 +12,6 @@ pom.xml.asc
 figwheel_server.log
 resources/public/js/out
 resources/public/js/foreclojure*
+resources/public/js/deps.js
+resources/public/css/pure.css
+node_modules/
