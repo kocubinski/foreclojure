@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-js_files=( node_modules/twojs-browserify/two.clean.js )
+js_files=( ../twojs-browserify/two.clean.js )
 css_dir=resources/public/css
 
 browserify $js_files -o resources/public/js/deps.js

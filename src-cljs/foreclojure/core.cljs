@@ -3,12 +3,9 @@
 (defn by-id [id]
   (. js/document getElementById id))
 
-(defn log [msg]
-  (. js/console log msg))
-
 (defn two []
   (let [div (by-id "canvas")]
-    (when-let [two (by-id "two")]
+    (when-let [two (aget (.-children div) 0)]
       (.removeChild div two))
     (.appendTo (js/Two. (clj->js {:width (.-clientWidth div)
                                   :height 600}))
@@ -20,18 +17,28 @@
   (let [{:keys [width height padding]} size]
     ))
 
+(defn walk [t f]
+  ((fn step [[h & rs] x y]
+     (when h
+       (f h x y)
+       (cons (if (coll? h) (step h 0 (inc y)) h)
+             (step rs (inc x) y))))
+   t 1 1))
+
+(defn draw-node [n x y ys]
+  )
+
 (defn draw [t]
-  (let [ws (transient {})]
-    (letfn [(traverse [t f]
-              ((fn step [[h & rs] x y]
-                 (when h
-                   (f h x y)
-                   (when-not (coll? h)
-                     (assoc! ws y (inc (get ws y 0))))
-                   (cons (if (coll? h) (step h 0 (inc y)) h)
-                         (step rs (inc x) y))))
-               t 0 0))]
-      (persistent! ws))))
+  (let [two (two)
+        ys (transient {})]
+    (walk t (fn [h x y] (when-not (coll? h)
+                             (assoc! ys y (inc (get ys y 0))))))
+    (walk t (fn [n x y]
+              (let [r (/ 1 (inc (get ys y)))
+                    cx (* x r (.-width two)) cy (* y 70)]
+                (. two makeCircle cx cy  25)
+                (js/Two.Text. (str n) cx cy))))
+    (. two update)))
 
 (defn init []
   (let [two (two)
