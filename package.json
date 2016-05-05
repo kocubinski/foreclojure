@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "A collection of my solutions and other musings around [4clojure](http://4clojure.com).",
   "dependencies": {
-    "jquery": "~2.2.3",
+    "purecss": "^0.6.0",
     "twojs-browserify": "~0.2.0"
   }
 }
