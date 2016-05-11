@@ -16,6 +16,6 @@
                          :figwheel true
                          :compiler {:main "foreclojure.core"
                                     :asset-path "js/out"
-                                    :output-to "resources/public/js/foreclojure.js+"
+                                    :output-to "resources/public/js/foreclojure.js"
                                     :output-dir "resources/public/js/out" } } ]
               })

@@ -23,22 +23,41 @@
        (f h x y)
        (cons (if (coll? h) (step h 0 (inc y)) h)
              (step rs (inc x) y))))
-   t 1 1))
+   t 0 0))
 
-(defn draw-node [n x y ys]
-  )
+
 
 (defn draw [t]
   (let [two (two)
         ys (transient {})]
     (walk t (fn [h x y] (when-not (coll? h)
-                             (assoc! ys y (inc (get ys y 0))))))
-    (walk t (fn [n x y]
-              (let [r (/ 1 (inc (get ys y)))
-                    cx (* x r (.-width two)) cy (* y 70)]
-                (. two makeCircle cx cy  25)
-                (js/Two.Text. (str n) cx cy))))
-    (. two update)))
+                         (assoc! ys y (inc (get ys y 0))))))
+    (let [node-width (/ (.-width two)
+                        (Math/pow 2 (apply max (keys (persistent! ys)))))]
+      (println node-width)
+      (walk t (fn [n x y]
+                (when-not (coll? n)
+                  (let [r (/ 1 (inc (get ys y)))
+                        cx (* x r (.-width two)) cy (* y 70)]
+                    (println n r x y "@" cx cy)
+                    (. two makeCircle cx cy 25)
+                    (. two makeText (str n) cx cy))))))
+    (. two update)
+    (persistent! ys)))
+
+(defn draw-node [n]
+  )
+
+(defn draw-2 [t]
+  (let [two (two)]
+    ((fn step [[n & c :as ns] x y]
+       (println n "in" ns  x y)
+       (when n
+         (cons (if (coll? n)
+                 (step n x (inc y))
+                 [n (- x y) y])
+               (step c (inc x) y))))
+     t 0 0)))
 
 (defn init []
   (let [two (two)
