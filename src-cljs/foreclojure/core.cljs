@@ -32,32 +32,35 @@
         ys (transient {})]
     (walk t (fn [h x y] (when-not (coll? h)
                          (assoc! ys y (inc (get ys y 0))))))
-    (let [node-width (/ (.-width two)
-                        (Math/pow 2 (apply max (keys (persistent! ys)))))]
-      (println node-width)
-      (walk t (fn [n x y]
-                (when-not (coll? n)
-                  (let [r (/ 1 (inc (get ys y)))
-                        cx (* x r (.-width two)) cy (* y 70)]
-                    (println n r x y "@" cx cy)
-                    (. two makeCircle cx cy 25)
-                    (. two makeText (str n) cx cy))))))
+    (walk t (fn [n x y]
+              (when-not (coll? n)
+                (let [r (/ 1 (inc (get ys y)))
+                      cx (* x r (.-width two)) cy (* y 70)]
+                  (println n r x y "@" cx cy)
+                  (. two makeCircle cx cy 25)
+                  (. two makeText (str n) cx cy)))))
     (. two update)
     (persistent! ys)))
 
-(defn draw-node [n]
-  )
+(defn draw-node [two n x y]
+  (println "draw" n "at" x y)
+  (let [y (* y 70)]
+    (. two makeCircle x y 20)
+    (. two makeText (str n) x y)))
 
 (defn draw-2 [t]
-  (let [two (two)]
-    ((fn step [[n & c :as ns] x y]
-       (println n "in" ns  x y)
-       (when n
-         (cons (if (coll? n)
-                 (step n x (inc y))
-                 [n (- x y) y])
-               (step c (inc x) y))))
-     t 0 0)))
+  (let [two (two)
+        w 70 ;; todo resolve from depth-first walk
+        ]
+    ((fn step [n x y]
+       (if (coll? n)
+         (let [[p l r] n]
+           (step p x y)
+           (and l (step l (- x w) (inc y)))
+           (and r (step r (+ x w) (inc y))))
+         (draw-node two n x y)))
+     t (/ (.-width two) 2) 1)
+    (. two update)))
 
 (defn init []
   (let [two (two)
