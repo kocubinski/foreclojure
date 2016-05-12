@@ -25,41 +25,32 @@
              (step rs (inc x) y))))
    t 0 0))
 
-
-
-(defn draw [t]
-  (let [two (two)
-        ys (transient {})]
-    (walk t (fn [h x y] (when-not (coll? h)
-                         (assoc! ys y (inc (get ys y 0))))))
-    (walk t (fn [n x y]
-              (when-not (coll? n)
-                (let [r (/ 1 (inc (get ys y)))
-                      cx (* x r (.-width two)) cy (* y 70)]
-                  (println n r x y "@" cx cy)
-                  (. two makeCircle cx cy 25)
-                  (. two makeText (str n) cx cy)))))
-    (. two update)
-    (persistent! ys)))
+(def row-height 70)
 
 (defn draw-node [two n x y]
-  (println "draw" n "at" x y)
-  (let [y (* y 70)]
+  (let [y (* y row-height)]
+    (println "draw" n "at" x y)
     (. two makeCircle x y 20)
     (. two makeText (str n) x y)))
 
-(defn draw-2 [t]
+(defn draw-line [two x1 y1 x2 y2]
+  (. two makeLine x1 y1 x2 y2))
+
+(defn draw [t]
   (let [two (two)
-        w 70 ;; todo resolve from depth-first walk
-        ]
+        w 70 ]
     ((fn step [n x y]
        (if (coll? n)
-         (let [[p l r] n]
-           (step p x y)
-           (and l (step l (- x w) (inc y)))
-           (and r (step r (+ x w) (inc y))))
+         (let [[p l r] n
+               dx (* (. two -width) (- (/ 1 (+ y 1)) (/ 1 (+ y 2))))
+               walk (fn [n nx ny]
+                      (draw-line two x (* y row-height) nx (* ny row-height))
+                      (step n nx ny))]
+           (walk p x y)
+           (and l (walk l (- x dx) (inc y)))
+           (and r (walk r (+ x dx) (inc y))))
          (draw-node two n x y)))
-     t (/ (.-width two) 2) 1)
+     t (/ (. two -width) 2) 1)
     (. two update)))
 
 (defn init []
@@ -70,3 +61,36 @@
     (set! (.-stroke circle) "orangered")
     (set! (.-lineWidth circle) 5)
     (. two update)))
+
+(def test-tree
+  [1 [2
+      [3
+       ['a]
+       ['b]]
+      [4
+       ['c]
+       ['d]]]
+   [5
+    [6
+     ['e]
+     ['f]]
+    [7
+     ['g]
+     ['h]]]])
+
+(def strange-tree
+  '(c
+    (d)
+    (e)
+    (b
+     (f
+      (g)
+      (h))
+     (a
+      (i
+       (j
+        (k)
+        (l))
+       (m
+        (n)
+        (o)))))))
