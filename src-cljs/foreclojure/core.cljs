@@ -1,5 +1,7 @@
 (ns foreclojure.core)
 
+(def row-height 70)
+
 (defn by-id [id]
   (. js/document getElementById id))
 
@@ -11,21 +13,16 @@
                                   :height 600}))
                div)))
 
-(def size {:width 30 :height 30 :padding 5})
-
-(defn loc [x y w]
-  (let [{:keys [width height padding]} size]
-    ))
-
-(defn walk [t f]
-  ((fn step [[h & rs] x y]
-     (when h
-       (f h x y)
-       (cons (if (coll? h) (step h 0 (inc y)) h)
-             (step rs (inc x) y))))
-   t 0 0))
-
-(def row-height 70)
+(defn explore [t]
+  (let [ys (transient {})]
+    ((fn step [[h & rs] x y]
+       (when h
+         (when-not (coll? h)
+           (assoc! ys y (inc (get ys y 0))))
+         (cons (if (coll? h) (step h 0 (inc y)) h)
+               (step rs (inc x) y))))
+     t 0 1)
+    (persistent! ys)))
 
 (defn draw-node [two n x y]
   (let [y (* y row-height)]
@@ -36,7 +33,7 @@
 (defn draw-line [two x1 y1 x2 y2]
   (. two makeLine x1 y1 x2 y2))
 
-(defn draw [t]
+(defn draw-binary [t]
   (let [two (two)
         w 70 ]
     ((fn step [n x y]
@@ -53,13 +50,23 @@
      t (/ (. two -width) 2) 1)
     (. two update)))
 
-(defn init []
+(defn draw-any [t]
   (let [two (two)
-        circle (. two makeCircle 72 100 50)
-        rect (. two makeRectangle 213 100 100 100)]
-    (set! (.-fill circle) "#FF8000")
-    (set! (.-stroke circle) "orangered")
-    (set! (.-lineWidth circle) 5)
+        w 70
+        ys (explore t)]
+    ((fn step [n x y]
+       (if (coll? n)
+         (let [[p l r] n
+               dx (* (. two -width) (- (/ 1 (+ (ys y) 1)) (/ 1 (+ (ys y) 2))))
+               walk (fn [n nx ny]
+                      (draw-line two x (* y row-height) nx (* ny row-height))
+                      (step n nx ny))]
+           ;; find drawing general cases
+           (walk p x y)
+           (and l (walk l (- x dx) (inc y)))
+           (and r (walk r (+ x dx) (inc y))))
+         (draw-node two n x y)))
+     t (/ (. two -width) 2) 1)
     (. two update)))
 
 (def test-tree
