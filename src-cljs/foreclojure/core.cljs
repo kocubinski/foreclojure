@@ -1,6 +1,8 @@
 (ns foreclojure.core
   (:require
-   [goog.events :as gevents]))
+   [goog.events :as gevents]
+   [clojure.string :as str]
+   [cljs.reader :as reader]))
 
 (def row-height 70)
 
@@ -81,13 +83,14 @@
 
 (defn on-text-change [e]
   (let [v (-> e .-target .-value)
-        t (try (cljs.reader/read-string v) (catch js/Error e nil))]
+        t (try (reader/read-string v) (catch js/Error e nil))]
+    (. js/console log v t)
     (when (and t (not= 32 (.-keyCode e)))
       (set! (-> e .-target .-value)
             (str-tree
              (-> v
-                 (clojure.string/replace #" " "")
-                 (clojure.string/replace #"\n" ""))))
+                 (str/replace #" " "")
+                 (str/replace #"\n" ""))))
       (draw-any t))))
 
 (defonce init
