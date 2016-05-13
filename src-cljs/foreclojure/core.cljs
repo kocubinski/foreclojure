@@ -1,4 +1,6 @@
-(ns foreclojure.core)
+(ns foreclojure.core
+  (:require
+   [goog.events :as gevents]))
 
 (def row-height 70)
 
@@ -26,7 +28,6 @@
 
 (defn draw-node [two n x y]
   (let [y (* y row-height)]
-    ;;(println "draw" n "at" x y)
     (. two makeCircle x y 20)
     (. two makeText (str n) x y)))
 
@@ -52,24 +53,46 @@
 
 (defn draw-any [t]
   (let [two (two)
+        lines (. two makeGroup)
         w 70
         ys (explore t)
         seen (atom (zipmap (keys ys) (repeat 0)))]
-    (println "explored" ys)
     ((fn step [n x y]
        (doseq [node n]
          (if-not (coll? node)
            (draw-node two node x y)
            (let [ny (inc y)
-                 lx (@seen ny)
-                 nx (* (. two -width) (/ (inc lx) (inc (ys ny))))]
+                 nx (* (. two -width) (/ (inc (@seen ny)) (inc (ys ny))))]
              (swap! seen update ny inc)
-             (draw-line two x (* y row-height) nx (* ny row-height))
-             (step node nx ny)))
-         )
-       )
+             (.add lines (draw-line two x (* y row-height) nx (* ny row-height)))
+             (step node nx ny)))))
      t (/ (. two -width) 2) 1)
     (. two update)))
+
+(defn str-tree [t]
+  ((fn step [[c & r] indent]
+     (when c
+       (condp re-matches c
+         #"\[|\(" (str (if-not (= indent 0) "\n") (apply str (repeat (inc indent) \space)) c
+                       (step r (inc indent)))
+         #"\]|\)" (str c (step r (dec indent)))
+         (str c (step r indent)))))
+   (str t) 0))
+
+(defn on-text-change [e]
+  (let [v (-> e .-target .-value)]
+    (when-let [t (try (cljs.reader/read-string v) (catch js/Error e nil))]
+      (set! (-> e .-target .-value)
+            (str-tree
+             (-> v
+                 (clojure.string/replace #" " "")
+                 (clojure.string/replace #"\n" ""))))
+      (draw-any t))))
+
+(defonce init
+  (gevents/listen
+   (by-id "txt-tree") goog.events.EventType.KEYUP
+   (fn [e] (on-text-change e))))
 
 (def test-tree
   [1 [2
@@ -81,7 +104,6 @@
        ]]
    [5
     [6
-
      ['f]]
     [7
      ['g]
@@ -99,7 +121,9 @@
       (i
        (j
         (k)
-        (l))
+        (l)
+        (q)
+        (r))
        (m
         (n)
         (o)))))))
