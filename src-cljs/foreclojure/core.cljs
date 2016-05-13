@@ -80,8 +80,9 @@
    (str t) 0))
 
 (defn on-text-change [e]
-  (let [v (-> e .-target .-value)]
-    (when-let [t (try (cljs.reader/read-string v) (catch js/Error e nil))]
+  (let [v (-> e .-target .-value)
+        t (try (cljs.reader/read-string v) (catch js/Error e nil))]
+    (when (and t (not= 32 (.-keyCode e)))
       (set! (-> e .-target .-value)
             (str-tree
              (-> v
