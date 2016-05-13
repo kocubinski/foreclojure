@@ -78,25 +78,20 @@
          #"\[|\(" (str (if-not (= indent 0) "\n") (apply str (repeat (inc indent) \space)) c
                        (step r (inc indent)))
          #"\]|\)" (str c (step r (dec indent)))
+         #" |\n" (step r indent)
          (str c (step r indent)))))
    (str t) 0))
+
+(defn process-tree [t]
+  (set! (. (by-id "txt-tree") -value)
+        (str-tree (str t)))
+  (draw-any t))
 
 (defn on-text-change [e]
   (let [v (-> e .-target .-value)
         t (try (reader/read-string v) (catch js/Error e nil))]
-    (. js/console log v t)
     (when (and t (not= 32 (.-keyCode e)))
-      (set! (-> e .-target .-value)
-            (str-tree
-             (-> v
-                 (str/replace #" " "")
-                 (str/replace #"\n" ""))))
-      (draw-any t))))
-
-(defonce init
-  (gevents/listen
-   (by-id "txt-tree") goog.events.EventType.KEYUP
-   (fn [e] (on-text-change e))))
+      (process-tree t))))
 
 (def test-tree
   [1 [2
@@ -131,3 +126,9 @@
        (m
         (n)
         (o)))))))
+
+(defonce init
+  (do (gevents/listen
+       (by-id "txt-tree") goog.events.EventType.KEYUP
+       (fn [e] (on-text-change e)))
+      (process-tree strange-tree)))
